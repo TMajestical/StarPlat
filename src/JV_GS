@@ -1,0 +1,77 @@
+function GNN_Train(GNN & gnn, int total_epochs, int batch_size)
+{
+    gnn.InitializeWeights();
+
+    int epoch  = 0;
+    bool training = true;
+
+    while(training)
+    {
+
+        // std::chrono::high_resolution_clock::time_point start,end;
+        // start = chrono::high_resolution_clock::now();
+
+        // cout<<"Epoch "<<fixed<<setprecision(3)<<epoch+1<<flush;
+
+        int processed_vertex_count  = 0;
+
+        bool continue_epoch = true;
+        
+        while(continue_epoch) //looping over the train vertices
+        {
+        
+            
+            container<double> y_pred_probs;
+            int cur_vertex = gnn.getTrainVertexId(processed_vertex_count);
+
+            y_pred_probs = gnn.forward(cur_vertex); //forward pass works on one sample at time
+            gnn.backprop(cur_vertex,y_pred_probs);
+            
+            processed_vertex_count++;
+
+            bool done = (processed_vertex_count == gnn.getTrainSetSize());
+
+            if(processed_vertex_count%batch_size == 0 || done)
+            {
+                gnn.optimiser_step();
+                
+                if(done)
+                {
+                    // end = chrono::high_resolution_clock::now();
+                    gnn.displayEpochStats();
+                    
+                }
+                
+                gnn.resetGrads();
+            }
+
+            continue_epoch = !done;
+        }
+
+        // chrono::duration<double> time = end-start;
+        // cout<<" Time : "<<fixed<<setprecision(2)<<time.count()<<"s"<<endl;
+
+        epoch = epoch + 1;
+        
+        if(epoch == total_epochs)
+            training = false;
+    }
+ 
+    //Evalute the model over test data.
+    //cout<<endl;
+    gnn.evaluateModel();
+}
+
+/*
+Things to do:
+
+    1. Initialization of layers must be separated from model creation
+    2. forward and backward function definitons : take care of all_ais, all_his, dw_list, db_list
+    3. Write a function optimize() which sees the type of optimizer and calls the respective function of the class Optimiser
+
+All Ais, All His, dw_list, db_list are to be stored in the GNN class
+
+Number of layers, sample size, activation type etc have to be specified in main function [to be written in the gnerated code]
+they have to be created passed as argument to the GraphSAGE function
+
+*/

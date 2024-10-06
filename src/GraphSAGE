@@ -1,0 +1,64 @@
+function GraphSAGE(Graph g, GNN gnn, int max_epochs, int batch_size ,container<int> training_vertices, container<int> testing_vertices, container<int> labels)
+{
+    gnn.initializeLayers("xavier");
+    
+    int epoch = 1;
+    bool training =  true;
+    while(training)
+    {
+        if(num_epoch == max_epochs){
+            training = false;
+        }
+        epoch = epoch + 1;
+        int cur_vertex = 0;
+
+        bool continue_epoch = true;
+
+        while(continue_epoch)
+        {
+        
+            bool batch_not_done  = true;
+            if(batch_not_done)
+            {
+                gnn.forward(g, cur_vertex);
+                gnn.backprop(g, cur_vertex);
+
+                cur_vertex = cur_vertex + 1;
+
+                //int remaining_in_batch = cur_vertex - (cur_vertex/batch_size)*batch_size; 
+                int remaining_in_batch = cur_vertex %batch_size; 
+
+                if(remaining_in_batch == 0)
+                {
+                    batch_not_done = false;
+                }
+
+            }
+            
+            if(!batch_not_done)
+                gnn.optimize("adam");
+
+            if(cur_vertex == training_vertices.size())
+            {
+                continue_epoch = false;
+            }
+
+        }
+    }
+
+    gnn.evaluate();
+}
+
+/*
+Things to do:
+
+    1. Initialization of layers must be separated from model creation
+    2. forward and backward function definitons : take care of all_ais, all_his, dw_list, db_list
+    3. Write a function optimize() which sees the type of optimizer and calls the respective function of the class Optimiser
+
+All Ais, All His, dw_list, db_list are to be stored in the GNN class
+
+Number of layers, sample size, activation type etc have to be specified in main function [to be written in the gnerated code]
+they have to be created passed as argument to the GraphSAGE function
+
+*/
