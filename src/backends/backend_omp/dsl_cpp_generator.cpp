@@ -45,7 +45,7 @@ namespace spomp
     header.pushString("#include");
     addIncludeToFile("../atomicUtil.h", header, false);
     header.pushString("#include");
-    addIncludeToFile("../JV_GraphSAGE_GNN.cpp", header, false);
+    addIncludeToFile("../JV_GraphSAGE_omp_parallel.cpp", header, false);
     header.NewLine();
     main.pushString("#include");
     sprintf(temp, "%s.h", fileName);
@@ -2841,7 +2841,8 @@ namespace spomp
       // targetFile.space();
       //}
       if((*itr)->isByReference())
-          targetFile.pushString(" &");
+          targetFile.pushString("&");
+        
       targetFile.pushString(/*createParamName(*/ (*itr)->getIdentifier()->getIdentifier());
       if (argumentTotal > 0)
         targetFile.pushString(" , ");

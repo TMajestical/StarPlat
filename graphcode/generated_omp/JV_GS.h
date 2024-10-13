@@ -6,10 +6,10 @@
 #include<atomic>
 #include<omp.h>
 #include"../atomicUtil.h"
-#include"../JV_GraphSAGE_GNN.cpp"
+#include"../JV_GraphSAGE_omp_parallel.cpp"
 
 using namespace std;
 
-void GNN_Train(GNN   &gnn , int total_epochs , int batch_size);
+void GNN_Train(GNN  &gnn , int total_epochs , int batch_size);
 
 #endif

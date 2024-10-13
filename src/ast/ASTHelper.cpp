@@ -222,11 +222,11 @@ static ASTNodeList* createNList(ASTNode* node)
 
 }
 
-static ASTNode* createParamNode(ASTNode* type,ASTNode* id, bool isByReference = false)
+static ASTNode* createParamNode(ASTNode* type, bool isByReference, ASTNode* id)
 {
   //~ Identifier* paramId=(Identifier*)id;
   // cout<<"PARAMID NODE VALUE "<<paramId->getIdentifier()<<"\n";
-  formalParam* formalParamNode=formalParam::createFormalParam((Type*)type,(Identifier*)id, isByReference);
+  formalParam* formalParamNode=formalParam::createFormalParam((Type*)type,isByReference,(Identifier*)id);
   return formalParamNode;
 
 }

@@ -916,9 +916,10 @@ public:
   {
     type = NULL;
     identifier = NULL;
+    bool byReference = false;
   }
 
-  static formalParam *createFormalParam(Type *typeSent, Identifier *identifierSent, bool isByReference)
+  static formalParam *createFormalParam(Type *typeSent, bool isByReference, Identifier *identifierSent)
   {
     formalParam *formalPNode = new formalParam();
     formalPNode->type = typeSent;

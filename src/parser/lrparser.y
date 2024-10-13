@@ -86,9 +86,7 @@
 %type <node> reductionCall 
 %type <aList> arg_list
 %type <ival> reduction_calls reduce_op
-
-
-
+%type <bval> by_reference
 
 
  /* operator precedence
@@ -156,24 +154,7 @@ type: type1 {$$ = $1;}
     | type2 {$$ = $1;}
 	| type3 {$$ = $1;}
 
-param : type1 id {  //Identifier* id=(Identifier*)Util::createIdentifierNode($2);
-                        Type* type=(Type*)$1;
-	                     Identifier* id=(Identifier*)$2;
-						 
-						 if(type->isGraphType())
-						    {
-							 tempIds.push_back(id);
-						   
-							}
-						 if(type->isGNNType())
-						    {
-							 tempIds.push_back(id);
-						   
-							}
-					printf("\n");
-                    $$=Util::createParamNode($1,$2); };
-
-				|type1 '&' id {  //Identifier* id=(Identifier*)Util::createIdentifierNode($3);
+param : type by_reference id {  //Identifier* id=(Identifier*)Util::createIdentifierNode($3);
                         Type* type=(Type*)$1;
 	                     Identifier* id=(Identifier*)$3;
 						 
@@ -188,24 +169,24 @@ param : type1 id {  //Identifier* id=(Identifier*)Util::createIdentifierNode($2)
 						   
 							}
 					printf("\n");
-                    $$=Util::createParamNode($1,$3,true); };
+                    $$=Util::createParamNode($1,$2,$3); };
 
-               | type2 id { // Identifier* id=(Identifier*)Util::createIdentifierNode($2);
+               | type2 by_reference id { // Identifier* id=(Identifier*)Util::createIdentifierNode($2);
 			  
 					
-                             $$=Util::createParamNode($1,$2);};
+                             $$=Util::createParamNode($1,$2,$3);};
 
-				| type2 '&' id { // Identifier* id=(Identifier*)Util::createIdentifierNode($3);
-			  
-					
-                             $$=Util::createParamNode($1,$3,true);};
-			   | type2 id '(' id ')' { // Identifier* id1=(Identifier*)Util::createIdentifierNode($4);
-			                            //Identifier* id=(Identifier*)Util::createIdentifierNode($2);
+
+			   | type2 by_reference id '(' id ')' { // Identifier* id1=(Identifier*)Util::createIdentifierNode($5);
+			                            //Identifier* id=(Identifier*)Util::createIdentifierNode($3);
 				                        Type* tempType=(Type*)$1;
 			                            if(tempType->isNodeEdgeType())
-										  tempType->addSourceGraph($4);
-				                         $$=Util::createParamNode(tempType,$2);
+										  tempType->addSourceGraph($5);
+				                         $$=Util::createParamNode(tempType,$2,$3);
 									 };
+
+by_reference : /* epsilon */ {$$ = false;};
+		| '&' {$$ = true;};
 
 
 function_body : blockstatements {$$=$1;};
@@ -338,7 +319,7 @@ expression : proc_call { $$=$1;};
 	         | expression '-' expression { $$=Util::createNodeForArithmeticExpr($1,$3,OPERATOR_SUB);};
 	         | expression '*' expression {$$=Util::createNodeForArithmeticExpr($1,$3,OPERATOR_MUL);};
 	         | expression'/' expression{$$=Util::createNodeForArithmeticExpr($1,$3,OPERATOR_DIV);};
-			 | expression'%' expression{$$=Util::createNodeForArithmeticExpr($1,$3,OPERATOR_DIV);};
+			 | expression'%' expression{$$=Util::createNodeForArithmeticExpr($1,$3,OPERATOR_MOD);};
              | expression T_AND_OP expression {$$=Util::createNodeForLogicalExpr($1,$3,OPERATOR_AND);};
 	         | expression T_OR_OP  expression {$$=Util::createNodeForLogicalExpr($1,$3,OPERATOR_OR);};
 	         | expression T_LE_OP expression {$$=Util::createNodeForRelationalExpr($1,$3,OPERATOR_LE);};

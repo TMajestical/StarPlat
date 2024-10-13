@@ -1,48 +1,17 @@
-// #include<stdio.h>
-// #include<stdlib.h>
-#include<limits.h>
-#include<atomic>
-#include<omp.h>
-#include"../atomicUtil.h"
-#include"../JV_GraphSAGE_GNN.cpp"
-//#include"JV_GS.h"
+#include"JV_GS.h"
 
-void GNN_Train(string &graph_path,string &data_path, vector<int> hidden_sizes, vector<int> sample_sizes , int total_epochs , int batch_size)
+void GNN_Train(GNN  &gnn , int total_epochs , int batch_size)
 {
-
-  graph G("../../Datasets/PubMed/edgelist.txt");
-  G.parseGraph();
-
-  Dataset data("../../Datasets/PubMed",G);
-  data.printDataStats();
-
-  int input_size = data.input_feature_dim;
-  int output_size = data.num_classes;
-
-  string hidden_activation = "tanh";
-  string output_activation = "softmax";
-  string aggregation_type = "mean";
-  
-  //Creating the Model and initializing the weights.
-  GNN gnn(hidden_sizes,sample_sizes,aggregation_type,input_size,output_size,hidden_activation,output_activation,data);
-  gnn.printArchitecture();
   gnn.InitializeWeights();
-
-
-  // RMSprop optim(model,lr,weight_decay);
-  // model.optimiser = &optim;
-  double lr = 1e-3;
-  double weight_decay = 0.5;
-    
-  gnn.setOptimiser("RMSprop",lr,weight_decay);
-
-  // gnn.InitializeWeights();
 
   int epoch = 0;
   bool training = true;
   while (training){
     int processed_vertex_count = 0;
     bool continue_epoch = true;
+    std::chrono::high_resolution_clock::time_point start,end;
+    start = chrono::high_resolution_clock::now();
+    cout<<"Epoch "<<fixed<<setprecision(3)<<epoch+1<<flush;
     while (continue_epoch){
       vector<double> y_pred_probs;
       int cur_vertex = gnn.getTrainVertexId(processed_vertex_count);
@@ -51,26 +20,27 @@ void GNN_Train(string &graph_path,string &data_path, vector<int> hidden_sizes, v
 
       processed_vertex_count++;
       bool done = (processed_vertex_count == gnn.getTrainSetSize());
-      if (processed_vertex_count / batch_size == 0 || done )
+      if (processed_vertex_count % batch_size == 0 || done )
         {
         gnn.optimiser_step();
 
         if (done )
           {
           gnn.displayEpochStats();
-          cout<<endl;
-
+          end = chrono::high_resolution_clock::now();
         }
         gnn.resetGrads();
 
       }
       continue_epoch = !done;
     }
+
+    chrono::duration<double> time = end-start;
+    cout<<" Time : "<<fixed<<setprecision(2)<<time.count()<<"s"<<endl;
     epoch = epoch + 1;
     if (epoch == total_epochs )
       training = false;
   }
-  cout<<endl;
   gnn.evaluateModel();
 
 
