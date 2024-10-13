@@ -1,3 +1,14 @@
-#dataset files
+#Ignore Datasets
+Datasets/
 Datasets/*
 
+#ignore output logs
+output_logs/
+output_logs/*
+
+#ignore log files
+*.log
+*.err
+
+#ignore compiled binaries of non-src codes
+*.out
